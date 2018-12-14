@@ -21,8 +21,8 @@ tss2_HEADERS = src/tss2-tcti-uefi.h
 all-local: AUTHORS
 
 example: \
-    example/get-capability.efi \
-    example/tpm2-get-capability.efi
+    example/tcg2-get-caps.efi \
+    example/tpm2-get-caps-fixed.efi
 
 clean-local:
 	rm -rf $(CLEANS)
@@ -30,10 +30,11 @@ clean-local:
 
 CLEANS = \
     AUTHORS \
-    example/get-capability.efi \
-    example/get-capability.so \
-    example/tpm2-get-capability.efi \
-    example/tpm2-get-capability.so
+    example/tcg2-get-caps.efi \
+    example/tcg2-get-caps.so \
+    example/tpm2-get-caps-fixed.efi \
+    example/tpm2-get-caps-fixed.so \
+    example/*.$(OBJEXT)
 
 EXTRA_DIST = \
     AUTHORS \
@@ -53,22 +54,21 @@ src_libtss2_tcti_uefi_a_SOURCES = src/tcti-uefi.c src/tcti-uefi.h \
 # 'example' directory before we build any targets
 example/.deps:
 	mkdir -p $@
-example/get-capability.$(OBJEXT): example/get-capability.c \
+example/tcg2-get-caps.$(OBJEXT): example/tcg2-get-caps.c \
     src/tcg2-protocol.h src/tcg2-util.h | example/.deps
-example/tpm2-get-capability.$(OBJEXT): example/tpm2-get-capability.c \
+example/tpm2-get-caps-fixed.$(OBJEXT): example/tpm2-get-caps-fixed.c \
     example/compat.h example/tss2-util.h | example/.deps
 
 # dependency expression for shared objects built for the UEFI executables
-example/get-capability.so: CFLAGS+=$(EXTRA_CFLAGS) $(AM_CFLAGS)
-example/get-capability.so: LDFLAGS+=-Wl,--no-undefined
-example/get-capability.so: LDLIBS+=-l:libtss2-sys.a -l:libtss2-mu.a
-example/get-capability.so: example/get-capability.o src/tcg2-util.o
+example/tcg2-get-caps.so: CFLAGS+=$(EXTRA_CFLAGS) $(AM_CFLAGS)
+example/tcg2-get-caps.so: LDFLAGS+=-Wl,--no-undefined
+example/tcg2-get-caps.so: example/tcg2-get-caps.o src/tcg2-util.o
 
-example/tpm2-get-capability.so: CFLAGS+=$(EXTRA_CFLAGS) $(AM_CFLAGS)
-example/tpm2-get-capability.so: LDFLAGS+=-Wl,--no-undefined
-example/tpm2-get-capability.so: LDLIBS+=-l:libtss2-sys.a -l:libtss2-mu.a
-example/tpm2-get-capability.so: \
-    example/tpm2-get-capability.o example/tss2-util.o example/compat.o \
+example/tpm2-get-caps-fixed.so: CFLAGS+=$(EXTRA_CFLAGS) $(AM_CFLAGS)
+example/tpm2-get-caps-fixed.so: LDFLAGS+=-Wl,--no-undefined
+example/tpm2-get-caps-fixed.so: LDLIBS+=-l:libtss2-sys.a -l:libtss2-mu.a
+example/tpm2-get-caps-fixed.so: \
+    example/tpm2-get-caps-fixed.o example/tss2-util.o example/compat.o \
     src/libtss2-tcti-uefi.a
 
 # rule to extract contributors from git history & generate AUTHORS file
