@@ -8,6 +8,25 @@ addons:
       - libcmocka0
       - gnulib
       - gnu-efi
+      - automake
+      - autoconf
+      - libtool
+      - gcc
+      - build-essential
+      - libssl-dev
+      - dh-exec
+      - pkg-config
+      - libfuse-dev
+      - libglib2.0-dev
+      - libgmp-dev
+      - expect
+      - libtasn1-dev
+      - socat
+      - tpm-tools
+      - python3-twisted
+      - gnutls-dev
+      - gnutls-bin
+      - qemu
 
 env:
   global:
@@ -40,6 +59,18 @@ install:
   - $MAKE
   - sudo $MAKE install
   - popd
+  - git clone -b master --single-branch https://github.com/stefanberger/libtpms
+  - pushd libtpms
+  - ./autogen.sh --with-openssl --prefix=/usr
+  - $MAKE
+  - sudo $MAKE install
+  - popd
+  - git clone -b master --single-branch https://github.com/stefanberger/swtpm
+  - pushd swtpm
+  - ./autogen.sh --with-openssl --prefix=/usr
+  - $MAKE
+  - sudo $MAKE install
+  - popd
 
 before_script:
   - ./bootstrap
@@ -48,3 +79,7 @@ script:
   - $SCANBUILD ./configure --enable-unit
   - $SCANBUILD $MAKE distcheck
   - $SCANBUILD $MAKE example
+  - sh lib/swtpm2.sh &
+  - sed -i 's/-vnc.*/-nographic \\/g' lib/qemu-tpm2.sh
+  - timeout 30s unbuffer \
+      sh lib/qemu-tpm2.sh
