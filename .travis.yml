@@ -81,5 +81,4 @@ script:
   - $SCANBUILD $MAKE example
   - sh lib/swtpm2.sh &
   - sed -i 's/-vnc.*/-nographic \\/g' lib/qemu-tpm2.sh
-  - timeout 30s unbuffer \
-      sh lib/qemu-tpm2.sh
+  - timeout 30s unbuffer sh lib/qemu-tpm2.sh
