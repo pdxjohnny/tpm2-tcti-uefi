@@ -1,2 +1,2 @@
 fs0:
-tpm2-get-capability.efi
+tpm2-get-caps-fixed.efi

@@ -49,26 +49,26 @@ install:
   - sha256sum autoconf-archive-2017.09.28.tar.xz | grep -q 5c9fb5845b38b28982a3ef12836f76b35f46799ef4a2e46b48e2bd3c6182fa01
   - tar xJf autoconf-archive-2017.09.28.tar.xz && pushd autoconf-archive-2017.09.28
   - ./configure --prefix=${PREFIX}
-  - $MAKE
+  - $MAKE -j
   - sudo $MAKE install
   - popd
   - git clone -b master --single-branch https://github.com/tpm2-software/tpm2-tss.git
   - pushd tpm2-tss
   - ./bootstrap --include=/usr/share/gnulib/m4
   - CONFIG_SITE=../lib/tss2-sys_config.site ./configure --prefix=${PREFIX} --disable-defaultflags --disable-doxygen-doc --disable-tcti-device --disable-tcti-mssim --disable-esapi --with-maxloglevel=none
-  - $MAKE
+  - $MAKE -j
   - sudo $MAKE install
   - popd
   - git clone -b master --single-branch https://github.com/stefanberger/libtpms
   - pushd libtpms
   - ./autogen.sh --with-openssl --prefix=/usr --with-tpm2
-  - $MAKE
+  - $MAKE -j
   - sudo $MAKE install
   - popd
   - git clone -b master --single-branch https://github.com/stefanberger/swtpm
   - pushd swtpm
   - ./autogen.sh --with-openssl --prefix=/usr CC=gcc
-  - $MAKE
+  - $MAKE -j
   - sudo $MAKE install
   - popd
 
@@ -77,8 +77,8 @@ before_script:
 
 script:
   - $SCANBUILD ./configure --enable-unit
-  - $SCANBUILD $MAKE distcheck
-  - $SCANBUILD $MAKE example
+  - $SCANBUILD $MAKE -j distcheck
+  - $SCANBUILD $MAKE -j example
   - sh lib/swtpm2.sh &
   - sed -i 's/-vnc.*/-nographic \\/g' lib/qemu-tpm2.sh
   - timeout 30s unbuffer sh lib/qemu-tpm2.sh
