@@ -1,84 +1,8 @@
-language: c
-dist: xenial
-
-addons:
-  apt:
-    packages:
-      - libcmocka-dev
-      - libcmocka0
-      - gnulib
-      - gnu-efi
-      - automake
-      - autoconf
-      - libtool
-      - gcc
-      - build-essential
-      - libssl-dev
-      - dh-exec
-      - pkg-config
-      - libfuse-dev
-      - libglib2.0-dev
-      - libgmp-dev
-      - expect
-      - libtasn1-dev
-      - socat
-      - tpm-tools
-      - python3-twisted
-      - gnutls-dev
-      - gnutls-bin
-      - qemu
-
-env:
-  global:
-    - JOBS="$(($(nproc)*3/2))"
-    - PREFIX=/usr
-    - MAKE="make --jobs=$JOBS"
-
-matrix:
-  include:
-    - compiler: clang
-      env: SCANBUILD="scan-build --status-bugs"
-    - compiler: gcc
-      env: SCANBUILD=
-
-after_failure:
-  - cat tpm2-tcti-uefi-*/_build/sub/test-suite.log
-
-install:
-  - wget https://download.01.org/tpm2/autoconf-archive-2017.09.28.tar.xz
-  - sha256sum autoconf-archive-2017.09.28.tar.xz | grep -q 5c9fb5845b38b28982a3ef12836f76b35f46799ef4a2e46b48e2bd3c6182fa01
-  - tar xJf autoconf-archive-2017.09.28.tar.xz && pushd autoconf-archive-2017.09.28
-  - ./configure --prefix=${PREFIX}
-  - $MAKE -j
-  - sudo $MAKE install
-  - popd
-  - git clone -b master --single-branch https://github.com/tpm2-software/tpm2-tss.git
-  - pushd tpm2-tss
-  - ./bootstrap --include=/usr/share/gnulib/m4
-  - CONFIG_SITE=../lib/tss2-sys_config.site ./configure --prefix=${PREFIX} --disable-defaultflags --disable-doxygen-doc --disable-tcti-device --disable-tcti-mssim --disable-esapi --with-maxloglevel=none
-  - $MAKE -j
-  - sudo $MAKE install
-  - popd
-  - git clone -b master --single-branch https://github.com/stefanberger/libtpms
-  - pushd libtpms
-  - ./autogen.sh --with-openssl --prefix=/usr --with-tpm2
-  - $MAKE -j
-  - sudo $MAKE install
-  - popd
-  - git clone -b master --single-branch https://github.com/stefanberger/swtpm
-  - pushd swtpm
-  - ./autogen.sh --with-openssl --prefix=/usr CC=gcc
-  - $MAKE -j
-  - sudo $MAKE install
-  - popd
+services:
+  - docker
 
 before_script:
-  - ./bootstrap
+  - docker build -t tpm2-tcti-uefi .
 
 script:
-  - $SCANBUILD ./configure --enable-unit
-  - $SCANBUILD $MAKE -j distcheck
-  - $SCANBUILD $MAKE -j example
-  - sh lib/swtpm2.sh &
-  - sed -i 's/-vnc.*/-nographic \\/g' lib/qemu-tpm2.sh
-  - timeout 30s unbuffer sh lib/qemu-tpm2.sh
+  - docker run --rm tpm2-tcti-uefi bash -xe example/run.sh
