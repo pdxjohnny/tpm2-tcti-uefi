@@ -98,6 +98,7 @@ RUN apt-get update && \
 WORKDIR /src/tpm2-tcti-uefi
 COPY . /src/tpm2-tcti-uefi
 
-RUN ./configure --enable-unit && \
+RUN ./bootstrap --include=/usr/share/gnulib/m4 && \
+  ./configure --enable-unit && \
   make -j distcheck && \
   make -j example
