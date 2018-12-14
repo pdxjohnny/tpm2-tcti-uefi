@@ -61,7 +61,7 @@ install:
   - popd
   - git clone -b master --single-branch https://github.com/stefanberger/libtpms
   - pushd libtpms
-  - ./autogen.sh --with-openssl --prefix=/usr
+  - ./autogen.sh --with-openssl --prefix=/usr --with-tpm2
   - $MAKE
   - sudo $MAKE install
   - popd
