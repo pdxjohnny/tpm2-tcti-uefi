@@ -67,7 +67,7 @@ install:
   - popd
   - git clone -b master --single-branch https://github.com/stefanberger/swtpm
   - pushd swtpm
-  - ./autogen.sh --with-openssl --prefix=/usr
+  - ./autogen.sh --with-openssl --prefix=/usr CC=gcc
   - $MAKE
   - sudo $MAKE install
   - popd
