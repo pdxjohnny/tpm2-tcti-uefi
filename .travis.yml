@@ -1,8 +1,22 @@
+language: c
 services:
   - docker
 
-before_script:
-  - docker build -t tpm2-tcti-uefi .
+git:
+  depth: 1
+
+matrix:
+  include:
+    env:
+      - CC="clang"
+      - SCANBUILD="scan-build --status-bugs"
+    env:
+      - CC="gcc"
+      - SCANBUILD=""
+
+install:
+  - docker build -t tpm2-tcti-uefi:builder --target builder .
 
 script:
-  - docker run --rm tpm2-tcti-uefi bash -xe example/run.sh
+  - docker build -t --build-arg CC=${CC} --build-arg SCANBUILD=${SCANBUILD} tpm2-tcti-uefi .
+  - docker run --rm -v $PWD:/src/tpm2-tcti-uefi tpm2-tcti-uefi ./example/run.sh

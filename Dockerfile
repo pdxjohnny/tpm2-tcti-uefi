@@ -1,7 +1,7 @@
-FROM debian:buster
+FROM debian:buster AS builder
 
-ENV PREFIX /usr
-ENV MAKE "make -j"
+ARG PREFIX=/usr
+ARG MAKE="make -j"
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
@@ -14,6 +14,8 @@ RUN apt-get update && \
     autoconf \
     libtool \
     gcc \
+    clang \
+    clang-tools \
     build-essential \
     libssl-dev \
     dh-exec \
@@ -62,13 +64,13 @@ RUN export retdir=$PWD && \
   git clone -b master --single-branch \
     https://github.com/stefanberger/libtpms && \
   cd libtpms && \
-  ./autogen.sh --with-openssl --prefix=/usr --with-tpm2 && \
+  ./autogen.sh --with-openssl --prefix=${PREFIX} --with-tpm2 && \
   $MAKE && \
   $MAKE install && \
   cd .. && \
   git clone -b master --single-branch https://github.com/stefanberger/swtpm && \
   cd swtpm && \
-  ./autogen.sh --with-openssl --prefix=/usr CC=gcc && \
+  ./autogen.sh --with-openssl --prefix=${PREFIX} CC=gcc && \
   $MAKE && \
   $MAKE install && \
   cd .. && \
@@ -76,9 +78,12 @@ RUN export retdir=$PWD && \
   rm -rf $tmpdir
 
 WORKDIR /src/tpm2-tcti-uefi
-COPY . /src/tpm2-tcti-uefi
 
-RUN ./bootstrap --include=/usr/share/gnulib/m4 && \
-  ./configure --enable-unit && \
-  make -j distcheck && \
-  make -j example
+
+FROM builder
+
+ARG CC=clang
+ARG SCANBUILD="scan-build --status-bugs"
+
+COPY . /src/tpm2-tcti-uefi
+RUN ./build.sh
