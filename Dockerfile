@@ -30,6 +30,7 @@ RUN apt-get update && \
     gnutls-bin \
     wget \
     qemu \
+    qemu-system-x86 \
     ovmf \
     git \
     net-tools \
