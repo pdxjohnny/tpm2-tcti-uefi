@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM debian:buster
 
 ENV PREFIX /usr
 ENV MAKE "make -j"
