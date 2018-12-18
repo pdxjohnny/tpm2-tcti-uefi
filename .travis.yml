@@ -14,5 +14,5 @@ install:
   - docker build -t tpm2-tcti-uefi:builder --target builder .
 
 script:
-  - docker build --build-arg CC=${CC} --build-arg SCANBUILD=${SCANBUILD} -t tpm2-tcti-uefi .
+  - docker build --build-arg CC="${CC}" --build-arg SCANBUILD="${SCANBUILD}" -t tpm2-tcti-uefi .
   - docker run --rm -v $PWD:/src/tpm2-tcti-uefi tpm2-tcti-uefi ./example/run.sh
